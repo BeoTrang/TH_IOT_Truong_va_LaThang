@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT Flask Web</title>
+    <script>
+        // Hàm cập nhật dữ liệu nhận từ API
+        async function updateReceivedData() {
+            const response = await fetch("/get_received_data");
+            const data = await response.json();
+
+            // Xóa nội dung cũ
+            const receivedList = document.getElementById("received-list");
+            receivedList.innerHTML = "";
+
+            // Thêm dữ liệu mới nhất nếu có
+            if (data && data.time && data.string) {
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <strong>Time:</strong> ${data.time} - <strong>String:</strong> ${data.string}
+                `;
+                receivedList.appendChild(li);
+            }
+        }
+
+        // Cập nhật dữ liệu mỗi giây
+        setInterval(updateReceivedData, 1000);
+    </script>
+</head>
+<body>
+    <h1>MQTT Flask Web</h1>
+
+    <form method="POST" action="/">
+        <label for="custom_string">Nhập dữ liệu để gửi:</label>
+        <input type="text" id="custom_string" name="custom_string" value="{{ latest_data.string if latest_data else '' }}" required>
+        <button type="submit">Cập nhật chuỗi gửi</button>
+    </form>
+
+    <hr>
+
+    <h2>Dữ liệu đã gửi</h2>
+    <ul>
+        {% if latest_data %}
+        <li>
+            <strong>Time:</strong> {{ latest_data.time }} - <strong>String:</strong> {{ latest_data.string }}
+        </li>
+        {% endif %}
+    </ul>
+
+    <hr>
+
+    <h2>Dữ liệu nhận từ MQTT (Mới nhất)</h2>
+    <ul id="received-list">
+        <!-- Dữ liệu nhận sẽ được cập nhật tự động -->
+    </ul>
+</body>
+</html>

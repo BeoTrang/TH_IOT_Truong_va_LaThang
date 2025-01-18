@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Điều khiển Động cơ</title>
+    <style>
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #status {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        #time {
+            font-size: 18px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Điều khiển Động cơ</h1>
+    <button class="button" onclick="controlMotor(1)">Bật động cơ</button>
+    <button class="button" onclick="controlMotor(0)">Tắt động cơ</button>
+
+    <br><br>
+    <p id="status">Trạng thái động cơ: Đang tắt</p>  <!-- Hiển thị trạng thái động cơ -->
+    <p id="time">Thời gian: N/A</p>  <!-- Hiển thị thời gian -->
+
+    <script>
+        function controlMotor(status) {
+            fetch(`/control_motor/${status}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                updateStatus(status, data.time);
+            })
+            .catch(error => console.log(error));
+        }
+
+        // Cập nhật trạng thái và thời gian động cơ trên giao diện
+        function updateStatus(status, time) {
+            const statusText = status === "1" ? "Đang bật" : "Đang tắt";
+            document.getElementById("status").innerText = "Trạng thái động cơ: " + statusText;
+            document.getElementById("time").innerText = "Thời gian: " + time;
+        }
+
+        // Hàm lấy trạng thái và thời gian động cơ mỗi giây
+        function fetchStatus() {
+            fetch('/get_status')
+            .then(response => response.json())
+            .then(data => {
+                updateStatus(data.status, data.time);
+            })
+            .catch(error => console.log(error));
+        }
+
+        // Lấy trạng thái và thời gian động cơ liên tục mỗi giây
+        setInterval(fetchStatus, 1000);  // Gọi hàm mỗi giây
+    </script>
+</body>
+</html>
